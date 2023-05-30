@@ -1,13 +1,56 @@
 ﻿@page "/"
+@using Option.CostModels;
 @using Option.UI.Data;
 @using SymbolManagerNamespace;
 @using YahooFinanceApi;
+<style>
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
 
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .chart-container {
+        margin-bottom: 20px;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+        .table th,
+        .table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table th {
+            background-color: #f5f5f5;
+        }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+        }
+
+</style>
 <PageTitle>Options Price</PageTitle>
-<div>
-    <div>
-
-        <select @onchange="SymbolSelected">
+<div class="container">
+    <div class="form-group">
+        <label for="symbol">Symbol</label>
+        <select class="form-control" @onchange="SymbolSelected">
             @foreach (SymbolsEnum symbol in Enum.GetValues(typeof(SymbolsEnum)))
             {
                 <option value="@symbol">@symbol</option>
@@ -18,37 +61,226 @@
     <div>
         <h3>Stock Chart</h3>
     </div>
+    <div class="chart-container">
+        <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+            <div>
+                <div class="form-group">
+                    <label for="startDate">Start Date</label>
+                    <InputDate @bind-Value="model.startDate" id="startDate" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date</label>
+                    <InputDate @bind-Value="model.endDate" id="endDate" class="form-control" />
+                </div>
+                <br />
+                <button @onclick="Zoom" class="btn btn-primary">Zoom</button>
+                <SfChart>
+                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" ZoomFactor="1"></ChartPrimaryXAxis>
+                    <ChartPrimaryYAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Double" ZoomFactor="1"></ChartPrimaryYAxis>
+                    <ChartSeriesCollection>
+                        <ChartSeries DataSource="@listZoom" XName="DateTime" YName="Close" Type="ChartSeriesType.Line"></ChartSeries>
+                    </ChartSeriesCollection>
+                </SfChart>
 
+                <div class="form-group">
+                    <label for="S">S - Stock Price</label>
+                    <InputNumber @bind-Value="@model.S" disabled class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="K">K - Strike Price</label>
+                    <InputNumber @bind-Value="@model.K" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="T">T - Time Until Expiration</label>
+                    <InputDate @bind-Value="model.T" id="StrikeDate" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="r">r - Risk-Free Interest Rate</label>
+                    <InputNumber @bind-Value="@model.r" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="sigma">sigma - Annual Volatility</label>
+                    <InputNumber @bind-Value="@model.sigma" disabled class="form-control" />
+                </div>
+                <br />
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </EditForm>
+
+    </div>
 </div>
-
-<SfChart Title="Sales History of Product X">
-    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" ZoomFactor="1"></ChartPrimaryXAxis>
-    <ChartPrimaryYAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Double" ZoomFactor="1"></ChartPrimaryYAxis>
-    <ChartSeriesCollection>
-        <ChartSeries DataSource="@list" XName="DateTime" YName="Close" Type="ChartSeriesType.Line"></ChartSeries>
-    </ChartSeriesCollection>
-</SfChart>
-
+@if (model.BSMModel != null && model.CRRModel != null && model.LevyModel != null)
+{
+    <h4>Model Results</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Model</th>
+                <th>Call</th>
+                <th>Put</th>
+                <th>Delta</th>
+                <th>Gamma</th>
+                <th>Vega</th>
+                <th>Theta</th>
+                <th>Rho</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>BSM Model</td>
+                <td>@model.BSMModel.CallPrice</td>
+                <td>@model.BSMModel.PutPrice</td>
+                <td>@model.BSMModel.Delta</td>
+                <td>@model.BSMModel.Gamma</td>
+                <td>@model.BSMModel.Vega</td>
+                <td>@model.BSMModel.Theta</td>
+                <td>@model.BSMModel.Rho</td>
+            </tr>
+            <tr>
+                <td>CRR Model</td>
+                <td>@model.CRRModel.CallPrice</td>
+                <td>@model.CRRModel.PutPrice</td>
+                <td>@model.CRRModel.Delta</td>
+                <td>@model.CRRModel.Gamma</td>
+                <td>@model.CRRModel.Vega</td>
+                <td>@model.CRRModel.Theta</td>
+                <td>@model.CRRModel.Rho</td>
+            </tr>
+            <tr>
+                <td>Levy Model</td>
+                <td>@model.LevyModel.CallPrice</td>
+                <td>@model.LevyModel.PutPrice</td>
+                <td>@model.LevyModel.Delta</td>
+                <td>@model.LevyModel.Gamma</td>
+                <td>@model.LevyModel.Vega</td>
+                <td>@model.LevyModel.Theta</td>
+                <td>@model.LevyModel.Rho</td>
+            </tr>
+        </tbody>
+    </table>
+}
 
 
 
 @code {
-    
-    private SymbolsEnum symbol;
-    IList<Candle> list;
+    protected OptionPriceVM model = new() { startDate = DateTime.Now.AddYears(-1), endDate = DateTime.Today };
+    protected SymbolsEnum symbol;
+    IList<Candle> listBase;
+    IList<Candle> listZoom;
     SymbolManager symbolManager = new SymbolManager();
 
-    private async Task SymbolSelected(ChangeEventArgs e)
+    protected async Task SymbolSelected(ChangeEventArgs e)
     {
         if (Enum.TryParse(e.Value.ToString(), out SymbolsEnum symbol))
         {
             this.symbol = symbol;
         }
-        list = (await symbolManager.ReadHistoricalDataAsync(symbol)).Where(obj => obj.DateTime > DateTime.Now.AddYears(-1)).ToList();
+        listBase = await symbolManager.ReadHistoricalDataAsync(symbol);
+        listZoom = listBase.Where(obj => obj.DateTime >= model.startDate && obj.DateTime <= model.endDate).ToList();
+        model.sigma = CalculateVolatility(listZoom.ToList(), model.startDate, model.endDate);
+        model.S = (double)listZoom.Last().Close;
     }
     protected override async Task OnInitializedAsync()
     {
-        await symbolManager.FetchAllSymbolsHistoricalDataAsync();
-        list =( await symbolManager.ReadHistoricalDataAsync(SymbolsEnum.AAPL)).Where(obj => obj.DateTime > DateTime.Now.AddYears(-1)).ToList();
+        listBase = await symbolManager.ReadHistoricalDataAsync(SymbolsEnum.AAPL);
+        listZoom = listBase.Where(obj => obj.DateTime >= model.startDate && obj.DateTime <= model.endDate).ToList();
+        model.sigma = CalculateVolatility(listZoom.ToList(), model.startDate, model.endDate);
+        model.S = (double)listZoom.Last().Close;
     }
+    protected async void Zoom()
+    {
+        listZoom = listBase.Where(obj => obj.DateTime >= model.startDate && obj.DateTime <= model.endDate).ToList();
+        model.sigma = CalculateVolatility(listZoom.ToList(), model.startDate, model.endDate);
+        model.S = (double)listZoom.Last().Close;
+    }
+    protected async void HandleValidSubmit()
+    {
+        var S = model.S;
+        var K = model.K;
+        var t = (model.T - DateTime.Now).TotalDays / 365.25;
+        var r = model.r / 100;
+        var sigma = model.sigma;
+
+        model.BSMModel = new ModelResult()
+            {
+                CallPrice = BSMModel.CallValue(S, K, t, r, sigma),
+                PutPrice = BSMModel.PutCallParity(S, K, t, r, sigma),
+                Delta = BSMModel.DeltaCall(S, K, t, r, sigma),
+                Gamma = BSMModel.GammaCall(S, K, t, r, sigma),
+                Vega = BSMModel.VegaCall(S, K, t, r, sigma),
+                Theta = BSMModel.ThetaCall(S, K, t, r, sigma),
+                Rho = BSMModel.RhoCall(S, K, t, r, sigma)
+            };
+        model.CRRModel = new ModelResult()
+            {
+                CallPrice = CRRModel.CallValue(S, K, t, r, sigma),
+                PutPrice = CRRModel.PutCallParity(S, K, t, r, sigma),
+                Delta = CRRModel.DeltaCall(S, K, t, r, sigma),
+                Gamma = CRRModel.GammaCall(S, K, t, r, sigma),
+                Vega = CRRModel.VegaCall(S, K, t, r, sigma),
+                Theta = CRRModel.ThetaCall(S, K, t, r, sigma),
+                Rho = CRRModel.RhoCall(S, K, t, r, sigma)
+            };
+        var levy = new LevyModel();
+        model.LevyModel = new ModelResult()
+            {
+                CallPrice = levy.CallValue(S, K, t, r, sigma),
+                PutPrice = levy.CallValue(S, K, t, r, sigma),
+                Delta = levy.DeltaCall(S, K, t, r, sigma),
+                Gamma = levy.GammaCall(S, K, t, r, sigma),
+                Vega = levy.VegaCall(S, K, t, r, sigma),
+                Theta = levy.ThetaCall(S, K, t, r, sigma),
+                Rho = levy.RhoCall(S, K, t, r, sigma)
+            };
+    }
+
+    public double CalculateVolatility(List<Candle> candles, DateTime startDate, DateTime endDate)
+    {
+        // Перевірка наявності даних
+        if (candles == null || candles.Count == 0)
+        {
+            throw new ArgumentException("The candles list is empty or null.");
+        }
+
+        // Перевірка відповідності дат
+        if (startDate >= endDate)
+        {
+            throw new ArgumentException("The start date must be earlier than the end date.");
+        }
+
+        // Відбір свічок в заданому проміжку дат
+        var selectedCandles = candles
+            .Where(candle => candle.DateTime >= startDate && candle.DateTime <= endDate)
+            .ToList();
+
+        // Перевірка кількості свічок
+        if (selectedCandles.Count < 2)
+        {
+            throw new ArgumentException("Not enough candles to calculate volatility for the specified date range.");
+        }
+
+        // Обчислення логарифмічних доходностей
+        var returns = new List<double>();
+        for (int i = 1; i < selectedCandles.Count; i++)
+        {
+            var currentCandle = selectedCandles[i];
+            var previousCandle = selectedCandles[i - 1];
+            var logReturn = Math.Log((double)(currentCandle.Close / previousCandle.Close));
+            returns.Add(logReturn);
+        }
+
+        // Обчислення середнього значення
+        double averageReturn = returns.Average();
+
+        // Обчислення середнього квадратичного відхилення
+        double sumOfSquaredDifferences = returns
+            .Select(ret => (ret - averageReturn) * (ret - averageReturn))
+            .Sum();
+
+        double volatility = Math.Sqrt(sumOfSquaredDifferences / (returns.Count - 1));
+
+        return volatility;
+    }
+
+
 }

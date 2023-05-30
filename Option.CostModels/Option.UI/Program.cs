@@ -1,3 +1,4 @@
+using SymbolManagerNamespace;
 using Syncfusion.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSyncfusionBlazor();
+SymbolManager symbolManager = new SymbolManager();
+await symbolManager.FetchAllSymbolsHistoricalDataAsync();
 
 var app = builder.Build();
 

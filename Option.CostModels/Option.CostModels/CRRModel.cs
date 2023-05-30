@@ -4,7 +4,7 @@ namespace Option.CostModels
 {
     public class CRRModel
     {
-        public static double CalculateOptionPrice(
+        public static double CallValue(
             double S, double K, double T,
             double r, double sigma)
         {
@@ -46,7 +46,7 @@ namespace Option.CostModels
             return optionValues[0, 0];
         }
 
-        public static double CalculatePutOptionPrice(
+        public static double PutCallParity(
             double S, double K, double T,
             double r, double sigma)
         {
@@ -88,72 +88,72 @@ namespace Option.CostModels
             return optionValues[0, 0];
         }
 
-        public static double CalculateDelta(
+        public static double DeltaCall(
             double S, double K, double T,
             double r, double sigma)
         {
             double epsilon = 0.01;
-            double priceUp = CalculateOptionPrice(
+            double priceUp = CallValue(
                 S + epsilon, K, T, r, sigma);
-            double priceDown = CalculateOptionPrice(
+            double priceDown = CallValue(
                 S - epsilon, K, T, r, sigma);
 
             double delta = (priceUp - priceDown) / (2 * epsilon);
             return delta;
         }
 
-        public static double CalculateGamma(
+        public static double GammaCall(
             double S, double K, double T,
             double r, double sigma)
         {
             double epsilon = 0.01;
-            double price = CalculateOptionPrice(
+            double price = CallValue(
                 S, K, T, r, sigma);
-            double priceUp = CalculateOptionPrice(
+            double priceUp = CallValue(
                 S + epsilon, K, T, r, sigma);
-            double priceDown = CalculateOptionPrice(
+            double priceDown = CallValue(
                 S - epsilon, K, T, r, sigma);
 
             double gamma = (priceUp - 2 * price + priceDown) / (epsilon * epsilon);
             return gamma;
         }
 
-        public static double CalculateVega(
+        public static double VegaCall(
             double S, double K, double T,
             double r, double sigma)
         {
             double epsilon = 0.0001;
-            double priceUp = CalculateOptionPrice(
+            double priceUp = CallValue(
                 S, K, T, r, sigma + epsilon);
-            double priceDown = CalculateOptionPrice(
+            double priceDown = CallValue(
                 S, K, T, r, sigma - epsilon);
 
             double vega = (priceUp - priceDown) / (2 * epsilon);
             return vega;
         }
 
-        public static double CalculateTheta(
+        public static double ThetaCall(
             double S, double K, double T,
             double r, double sigma)
         {
             double epsilon = 0.01;
-            double price = CalculateOptionPrice(
+            double price = CallValue(
                 S, K, T, r, sigma);
-            double priceDown = CalculateOptionPrice(
+            double priceDown = CallValue(
                 S, K, T - epsilon, r, sigma);
 
             double theta = (price - priceDown) / epsilon;
             return theta;
         }
 
-        public static double CalculateRho(
+        public static double RhoCall(
             double S, double K, double T,
             double r, double sigma)
         {
             double epsilon = 0.01;
-            double price = CalculateOptionPrice(
+            double price = CallValue(
                 S, K, T, r, sigma);
-            double priceUp = CalculateOptionPrice(
+            double priceUp = CallValue(
                 S, K, T, r + epsilon, sigma);
 
             double rho = (priceUp - price) / epsilon;

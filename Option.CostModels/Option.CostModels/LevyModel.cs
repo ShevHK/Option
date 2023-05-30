@@ -16,7 +16,7 @@ namespace Option.CostModels
             return Math.Sqrt(-2.0 * Math.Log(random.NextDouble())) * Math.Sin(2.0 * Math.PI * random.NextDouble());
         }
 
-        public double NormalInverseGaussian(double S, double K, double t, double r, double sigma)
+        public double CallValue(double S, double K, double t, double r, double sigma)
         {
             double mu = r - 0.5 * sigma * sigma;
 
@@ -35,47 +35,47 @@ namespace Option.CostModels
             return optionPrice;
         }
 
-        public double CalculateDelta(double S, double K, double t, double r, double sigma)
+        public double DeltaCall(double S, double K, double t, double r, double sigma)
         {
             double epsilon = 0.001; // small increment
-            double price = NormalInverseGaussian(S, K, t, r, sigma);
-            double priceWithIncrement = NormalInverseGaussian(S + epsilon, K, t, r, sigma);
+            double price = CallValue(S, K, t, r, sigma);
+            double priceWithIncrement = CallValue(S + epsilon, K, t, r, sigma);
             double delta = (priceWithIncrement - price) / epsilon;
             return delta;
         }
 
-        public double CalculateGamma(double S, double K, double t, double r, double sigma)
+        public double GammaCall(double S, double K, double t, double r, double sigma)
         {
             double epsilon = 0.001; // small increment
-            double delta = CalculateDelta(S, K, t, r, sigma);
-            double deltaWithIncrement = CalculateDelta(S + epsilon, K, t, r, sigma);
+            double delta = DeltaCall(S, K, t, r, sigma);
+            double deltaWithIncrement = DeltaCall(S + epsilon, K, t, r, sigma);
             double gamma = (deltaWithIncrement - delta) / epsilon;
             return gamma;
         }
 
-        public double CalculateVega(double S, double K, double t, double r, double sigma)
+        public double VegaCall(double S, double K, double t, double r, double sigma)
         {
             double epsilon = 0.001; // small increment
-            double price = NormalInverseGaussian(S, K, t, r, sigma);
-            double priceWithIncrement = NormalInverseGaussian(S, K, t, r, sigma + epsilon);
+            double price = CallValue(S, K, t, r, sigma);
+            double priceWithIncrement = CallValue(S, K, t, r, sigma + epsilon);
             double vega = (priceWithIncrement - price) / epsilon;
             return vega;
         }
 
-        public double CalculateTheta(double S, double K, double t, double r, double sigma)
+        public double ThetaCall(double S, double K, double t, double r, double sigma)
         {
             double epsilon = 0.001; // small increment
-            double price = NormalInverseGaussian(S, K, t, r, sigma);
-            double priceWithDecrement = NormalInverseGaussian(S, K, t - epsilon, r, sigma);
+            double price = CallValue(S, K, t, r, sigma);
+            double priceWithDecrement = CallValue(S, K, t - epsilon, r, sigma);
             double theta = (priceWithDecrement - price) / epsilon;
             return theta;
         }
 
-        public double CalculateRho(double S, double K, double t, double r, double sigma)
+        public double RhoCall(double S, double K, double t, double r, double sigma)
         {
             double epsilon = 0.001; // small increment
-            double price = NormalInverseGaussian(S, K, t, r, sigma);
-            double priceWithIncrement = NormalInverseGaussian(S, K, t, r + epsilon, sigma);
+            double price = CallValue(S, K, t, r, sigma);
+            double priceWithIncrement = CallValue(S, K, t, r + epsilon, sigma);
             double rho = (priceWithIncrement - price) / epsilon;
             return rho;
         }

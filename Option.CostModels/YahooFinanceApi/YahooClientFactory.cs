@@ -45,10 +45,6 @@ namespace YahooFinanceApi
 
                 var res = await client.Request().GetAsync(token).ConfigureAwait(false);
                 return client;
-
-                Debug.WriteLine("Failure to create client.");
-
-                await Task.Delay(100, token).ConfigureAwait(false);
             }
 
             throw new Exception("Failure to create client.");
