@@ -1,12 +1,54 @@
 ﻿@page "/"
+@using Option.UI.Data;
 @using SymbolManagerNamespace;
+@using YahooFinanceApi;
 
 <PageTitle>Options Price</PageTitle>
+<div>
+    <div>
 
-@code{
+        <select @onchange="SymbolSelected">
+            @foreach (SymbolsEnum symbol in Enum.GetValues(typeof(SymbolsEnum)))
+            {
+                <option value="@symbol">@symbol</option>
+            }
+        </select>
+    </div>
+
+    <div>
+        <h3>Stock Chart</h3>
+    </div>
+
+</div>
+
+<SfChart Title="Sales History of Product X">
+    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" ZoomFactor="1"></ChartPrimaryXAxis>
+    <ChartPrimaryYAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Double" ZoomFactor="1"></ChartPrimaryYAxis>
+    <ChartSeriesCollection>
+        <ChartSeries DataSource="@list" XName="DateTime" YName="Close" Type="ChartSeriesType.Line"></ChartSeries>
+    </ChartSeriesCollection>
+</SfChart>
+
+
+
+
+@code {
+    
+    private SymbolsEnum symbol;
+    IList<Candle> list;
+    SymbolManager symbolManager = new SymbolManager();
+
+    private async Task SymbolSelected(ChangeEventArgs e)
+    {
+        if (Enum.TryParse(e.Value.ToString(), out SymbolsEnum symbol))
+        {
+            this.symbol = symbol;
+        }
+        list = (await symbolManager.ReadHistoricalDataAsync(symbol)).Where(obj => obj.DateTime > DateTime.Now.AddYears(-1)).ToList();
+    }
     protected override async Task OnInitializedAsync()
     {
-        SymbolManager symbolManager = new SymbolManager();
         await symbolManager.FetchAllSymbolsHistoricalDataAsync();
+        list =( await symbolManager.ReadHistoricalDataAsync(SymbolsEnum.AAPL)).Where(obj => obj.DateTime > DateTime.Now.AddYears(-1)).ToList();
     }
 }

@@ -25,15 +25,7 @@ namespace SymbolManagerNamespace
             }
 
             List<Candle> historicalData;
-            if (lastDate == DateTime.MinValue)
-            {
-                DateTime startDate = endDate.AddYears(-10); // Вибрати період за останні 10 років
-                historicalData = (await Yahoo.GetHistoricalAsync(symbol.ToString(), startDate, endDate)).ToList();
-            }
-            else
-            {
-                historicalData = (await Yahoo.GetHistoricalAsync(symbol.ToString(), lastDate.AddDays(1), endDate)).ToList();
-            }
+            historicalData = (await Yahoo.GetHistoricalAsync(symbol.ToString(), lastDate.AddDays(1), endDate)).ToList();
 
             if (historicalData.Count > 0)
             {
@@ -100,7 +92,7 @@ namespace SymbolManagerNamespace
 
         private async Task<DateTime> GetLastDateAsync(string symbolFileName)
         {
-            DateTime lastDate = DateTime.MinValue;
+            DateTime lastDate = DateTime.Now;
 
             if (File.Exists(symbolFileName))
             {
@@ -108,7 +100,14 @@ namespace SymbolManagerNamespace
                 {
                     string lastLine = await reader.ReadToEndAsync();
                     string[] fields = lastLine.Split(',');
-                    lastDate = DateTime.Parse(fields[0]);
+                    try
+                    {
+                        lastDate = DateTime.Parse(fields[0]);
+                    }
+                    catch (Exception)
+                    {
+                        lastDate= lastDate.AddYears(-10);
+                    }
                 }
             }
 
