@@ -98,15 +98,20 @@ namespace SymbolManagerNamespace
             {
                 using (StreamReader reader = File.OpenText(symbolFileName))
                 {
-                    string lastLine = await reader.ReadToEndAsync();
-                    string[] fields = lastLine.Split(',');
+                    var allText = await reader.ReadToEndAsync();
+
+                    string[] lines = allText.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+                    string lastLine = lines.LastOrDefault();
+
                     try
                     {
+                        string[] fields = lastLine.Split(',');
                         lastDate = DateTime.Parse(fields[0]);
                     }
                     catch (Exception)
                     {
-                        lastDate= lastDate.AddYears(-10);
+                        lastDate = lastDate.AddYears(-10);
                     }
                 }
             }

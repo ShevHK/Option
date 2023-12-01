@@ -108,62 +108,63 @@
         </EditForm>
 
     </div>
+    @if (model.BSMModel != null && model.CRRModel != null && model.LevyModel != null)
+    {
+        <h4>Model Results</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Model</th>
+                    <th>Call</th>
+                    <th>Put</th>
+                    <th>Delta</th>
+                    <th>Gamma</th>
+                    <th>Vega</th>
+                    <th>Theta</th>
+                    <th>Rho</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>BSM Model</td>
+                    <td>@model.BSMModel.CallPrice</td>
+                    <td>@model.BSMModel.PutPrice</td>
+                    <td>@model.BSMModel.Delta</td>
+                    <td>@model.BSMModel.Gamma</td>
+                    <td>@model.BSMModel.Vega</td>
+                    <td>@model.BSMModel.Theta</td>
+                    <td>@model.BSMModel.Rho</td>
+                </tr>
+                <tr>
+                    <td>CRR Model</td>
+                    <td>@model.CRRModel.CallPrice</td>
+                    <td>@model.CRRModel.PutPrice</td>
+                    <td>@model.CRRModel.Delta</td>
+                    <td>@model.CRRModel.Gamma</td>
+                    <td>@model.CRRModel.Vega</td>
+                    <td>@model.CRRModel.Theta</td>
+                    <td>@model.CRRModel.Rho</td>
+                </tr>
+                <tr>
+                    <td>Levy Model</td>
+                    <td>@model.LevyModel.CallPrice</td>
+                    <td>@model.LevyModel.PutPrice</td>
+                    <td>@model.LevyModel.Delta</td>
+                    <td>@model.LevyModel.Gamma</td>
+                    <td>@model.LevyModel.Vega</td>
+                    <td>@model.LevyModel.Theta</td>
+                    <td>@model.LevyModel.Rho</td>
+                </tr>
+            </tbody>
+        </table>
+    }
 </div>
-@if (model.BSMModel != null && model.CRRModel != null && model.LevyModel != null)
-{
-    <h4>Model Results</h4>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Model</th>
-                <th>Call</th>
-                <th>Put</th>
-                <th>Delta</th>
-                <th>Gamma</th>
-                <th>Vega</th>
-                <th>Theta</th>
-                <th>Rho</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>BSM Model</td>
-                <td>@model.BSMModel.CallPrice</td>
-                <td>@model.BSMModel.PutPrice</td>
-                <td>@model.BSMModel.Delta</td>
-                <td>@model.BSMModel.Gamma</td>
-                <td>@model.BSMModel.Vega</td>
-                <td>@model.BSMModel.Theta</td>
-                <td>@model.BSMModel.Rho</td>
-            </tr>
-            <tr>
-                <td>CRR Model</td>
-                <td>@model.CRRModel.CallPrice</td>
-                <td>@model.CRRModel.PutPrice</td>
-                <td>@model.CRRModel.Delta</td>
-                <td>@model.CRRModel.Gamma</td>
-                <td>@model.CRRModel.Vega</td>
-                <td>@model.CRRModel.Theta</td>
-                <td>@model.CRRModel.Rho</td>
-            </tr>
-            <tr>
-                <td>Levy Model</td>
-                <td>@model.LevyModel.CallPrice</td>
-                <td>@model.LevyModel.PutPrice</td>
-                <td>@model.LevyModel.Delta</td>
-                <td>@model.LevyModel.Gamma</td>
-                <td>@model.LevyModel.Vega</td>
-                <td>@model.LevyModel.Theta</td>
-                <td>@model.LevyModel.Rho</td>
-            </tr>
-        </tbody>
-    </table>
-}
+
 
 
 
 @code {
-    protected OptionPriceVM model = new() { startDate = DateTime.Now.AddYears(-1), endDate = DateTime.Today };
+    protected OptionPriceVM model = new() { startDate = DateTime.Now.AddYears(-10), endDate = DateTime.Today };
     protected SymbolsEnum symbol;
     IList<Candle> listBase;
     IList<Candle> listZoom;
@@ -186,6 +187,9 @@
         listZoom = listBase.Where(obj => obj.DateTime >= model.startDate && obj.DateTime <= model.endDate).ToList();
         model.sigma = CalculateVolatility(listZoom.ToList(), model.startDate, model.endDate);
         model.S = (double)listZoom.Last().Close;
+        model.BSMModel = null;
+        model.CRRModel = null;
+        model.LevyModel = null;
     }
     protected async void Zoom()
     {
@@ -197,7 +201,7 @@
     {
         var S = model.S;
         var K = model.K;
-        var t = (model.T - DateTime.Now).TotalDays / 365.25;
+        var t = (model.T - model.endDate).TotalDays / 365.25;
         var r = model.r / 100;
         var sigma = model.sigma;
 
