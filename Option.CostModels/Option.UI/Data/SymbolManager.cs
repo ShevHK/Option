@@ -24,8 +24,11 @@ namespace SymbolManagerNamespace
                 return;
             }
 
-            List<Candle> historicalData;
+            List<Candle> historicalData=new();
+            try
+            {
             historicalData = (await Yahoo.GetHistoricalAsync(symbol.ToString(), lastDate.AddDays(1), endDate)).ToList();
+            }catch{ }
 
             if (historicalData.Count > 0)
             {

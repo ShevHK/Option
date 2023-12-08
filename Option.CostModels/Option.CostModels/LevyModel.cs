@@ -15,6 +15,15 @@ namespace Option.CostModels
         {
             return Math.Sqrt(-2.0 * Math.Log(random.NextDouble())) * Math.Sin(2.0 * Math.PI * random.NextDouble());
         }
+        private double LevyRandom()
+        {
+            double u = random.NextDouble();
+            double v = random.NextDouble();
+
+            double levyRandom = Math.Tan(Math.PI * (v - 0.5)) * (1.0 / (u * Math.Cos(Math.PI * (v - 0.5))));
+
+            return levyRandom;
+        }
 
         public double CallValue(double S, double K, double t, double r, double sigma)
         {
@@ -34,6 +43,25 @@ namespace Option.CostModels
 
             return optionPrice;
         }
+        public double PutValue(double S, double K, double t, double r, double sigma)
+        {
+            double mu = r - 0.5 * sigma * sigma;
+
+            int numSamples = 1000000;
+            double sum = 0;
+
+            for (int i = 0; i < numSamples; i++)
+            {
+                double levyRandom = StandardNormalRandom();
+                double ST = S * Math.Exp(mu * t + sigma * Math.Sqrt(t) * levyRandom);
+                sum += Math.Max(K - ST, 0);
+            }
+
+            double optionPrice = Math.Exp(-r * t) * (sum / numSamples);
+
+            return optionPrice;
+        }
+
 
         public double DeltaCall(double S, double K, double t, double r, double sigma)
         {

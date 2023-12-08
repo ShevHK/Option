@@ -49,7 +49,7 @@
 <PageTitle>Options Price</PageTitle>
 <div class="container">
     <div class="form-group">
-        <label for="symbol">Symbol</label>
+        <h3>Символ</h3>
         <select class="form-control" @onchange="SymbolSelected">
             @foreach (SymbolsEnum symbol in Enum.GetValues(typeof(SymbolsEnum)))
             {
@@ -59,21 +59,21 @@
     </div>
 
     <div>
-        <h3>Stock Chart</h3>
+        <h3>Графік акції</h3>
     </div>
     <div class="chart-container">
         <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
             <div>
                 <div class="form-group">
-                    <label for="startDate">Start Date</label>
+                    <label for="startDate">Від:</label>
                     <InputDate @bind-Value="model.startDate" id="startDate" class="form-control" />
                 </div>
                 <div class="form-group">
-                    <label for="endDate">End Date</label>
+                    <label for="endDate">До:</label>
                     <InputDate @bind-Value="model.endDate" id="endDate" class="form-control" />
                 </div>
                 <br />
-                <button @onclick="Zoom" class="btn btn-primary">Zoom</button>
+                <button @onclick="Zoom" class="btn btn-primary">Оновити графік</button>
                 <SfChart>
                     <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" ZoomFactor="1"></ChartPrimaryXAxis>
                     <ChartPrimaryYAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Double" ZoomFactor="1"></ChartPrimaryYAxis>
@@ -83,80 +83,99 @@
                 </SfChart>
 
                 <div class="form-group">
-                    <label for="S">S - Stock Price</label>
+                    <label for="S">S - Ціна акції</label>
                     <InputNumber @bind-Value="@model.S" disabled class="form-control" />
                 </div>
                 <div class="form-group">
-                    <label for="K">K - Strike Price</label>
+                    <label for="K">K - Ціна страйку(виконання)</label>
                     <InputNumber @bind-Value="@model.K" class="form-control" />
                 </div>
                 <div class="form-group">
-                    <label for="T">T - Time Until Expiration</label>
+                    <label for="T">T - Дата виконання опціону</label>
                     <InputDate @bind-Value="model.T" id="StrikeDate" class="form-control" />
                 </div>
                 <div class="form-group">
-                    <label for="r">r - Risk-Free Interest Rate</label>
+                    <label for="r">r - Безризикова відсоткова ставка (у %)</label>
                     <InputNumber @bind-Value="@model.r" class="form-control" />
                 </div>
                 <div class="form-group">
-                    <label for="sigma">sigma - Annual Volatility</label>
+                    <label for="sigma">sigma - Волатильність символу</label>
                     <InputNumber @bind-Value="@model.sigma" disabled class="form-control" />
                 </div>
                 <br />
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-primary">Обрахувати</button>
             </div>
         </EditForm>
 
     </div>
     @if (model.BSMModel != null && model.CRRModel != null && model.LevyModel != null)
     {
-        <h4>Model Results</h4>
+        <h4>Результати Моделей</h4>
+        <div>
+            <label>
+                <input type="checkbox" @bind="showFullNumbers"> Показати додаткові показники
+            </label>
+        </div>
         <table class="table">
             <thead>
                 <tr>
-                    <th>Model</th>
-                    <th>Call</th>
-                    <th>Put</th>
-                    <th>Delta</th>
-                    <th>Gamma</th>
-                    <th>Vega</th>
-                    <th>Theta</th>
-                    <th>Rho</th>
+                    <th>Назва моделі</th>
+                    <th>Call Опціон</th>
+                    <th>Put Опціон</th>
+                    @if (showFullNumbers)
+                    {
+                        <th>Delta</th>
+                        <th>Gamma</th>
+                        <th>Vega</th>
+                        <th>Theta</th>
+                        <th>Rho</th>
+                    }
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>BSM Model</td>
-                    <td>@model.BSMModel.CallPrice</td>
-                    <td>@model.BSMModel.PutPrice</td>
-                    <td>@model.BSMModel.Delta</td>
-                    <td>@model.BSMModel.Gamma</td>
-                    <td>@model.BSMModel.Vega</td>
-                    <td>@model.BSMModel.Theta</td>
-                    <td>@model.BSMModel.Rho</td>
+                    <td>Модель Блека-Скоулза </td>
+                    <td>@FormatValue(model.BSMModel.CallPrice)</td>
+                    <td>@FormatValue(model.BSMModel.PutPrice)</td>
+                    @if (showFullNumbers)
+                    {
+                        <td>@FormatValue(model.BSMModel.Delta)</td>
+                        <td>@FormatValue(model.BSMModel.Gamma)</td>
+                        <td>@FormatValue(model.BSMModel.Vega)</td>
+                        <td>@FormatValue(model.BSMModel.Theta)</td>
+                        <td>@FormatValue(model.BSMModel.Rho)</td>
+                    }
                 </tr>
                 <tr>
-                    <td>CRR Model</td>
-                    <td>@model.CRRModel.CallPrice</td>
-                    <td>@model.CRRModel.PutPrice</td>
-                    <td>@model.CRRModel.Delta</td>
-                    <td>@model.CRRModel.Gamma</td>
-                    <td>@model.CRRModel.Vega</td>
-                    <td>@model.CRRModel.Theta</td>
-                    <td>@model.CRRModel.Rho</td>
+                    <td>Модель Кокса-Росса</td>
+                    <td>@FormatValue(model.CRRModel.CallPrice)</td>
+                    <td>@FormatValue(model.CRRModel.PutPrice)</td>
+                    @if (showFullNumbers)
+                    {
+                        <td>@FormatValue(model.CRRModel.Delta)</td>
+                        <td>@FormatValue(model.CRRModel.Gamma)</td>
+                        <td>@FormatValue(model.CRRModel.Vega)</td>
+                        <td>@FormatValue(model.CRRModel.Theta)</td>
+                        <td>@FormatValue(model.CRRModel.Rho)</td>
+                    }
                 </tr>
                 <tr>
-                    <td>Levy Model</td>
-                    <td>@model.LevyModel.CallPrice</td>
-                    <td>@model.LevyModel.PutPrice</td>
-                    <td>@model.LevyModel.Delta</td>
-                    <td>@model.LevyModel.Gamma</td>
-                    <td>@model.LevyModel.Vega</td>
-                    <td>@model.LevyModel.Theta</td>
-                    <td>@model.LevyModel.Rho</td>
+                    <td>Модель Леві</td>
+                    <td>@FormatValue(model.LevyModel.CallPrice)</td>
+                    <td>@FormatValue(model.LevyModel.PutPrice)</td>
+                    @if (showFullNumbers)
+                    {
+                        <td>@FormatValue(model.LevyModel.Delta)</td>
+                        <td>@FormatValue(model.LevyModel.Gamma)</td>
+                        <td>@FormatValue(model.LevyModel.Vega)</td>
+                        <td>@FormatValue(model.LevyModel.Theta)</td>
+                        <td>@FormatValue(model.LevyModel.Rho)</td>
+                    }
                 </tr>
             </tbody>
         </table>
+
+
     }
 </div>
 
@@ -229,7 +248,7 @@
         model.LevyModel = new ModelResult()
             {
                 CallPrice = levy.CallValue(S, K, t, r, sigma),
-                PutPrice = levy.CallValue(S, K, t, r, sigma),
+                PutPrice = levy.PutValue(S, K, t, r, sigma),
                 Delta = levy.DeltaCall(S, K, t, r, sigma),
                 Gamma = levy.GammaCall(S, K, t, r, sigma),
                 Vega = levy.VegaCall(S, K, t, r, sigma),
@@ -285,6 +304,10 @@
 
         return volatility;
     }
+    private bool showFullNumbers = false;
 
-
+    private string FormatValue(double value)
+    {
+        return showFullNumbers ? value.ToString() : Math.Round(value, 2).ToString();
+    }
 }
